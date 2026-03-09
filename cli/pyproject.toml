@@ -18,6 +18,9 @@ lambda = []
 [project.scripts]
 trailpolicy = "trailpolicy.cli:main"
 
+[tool.setuptools.package-data]
+trailpolicy = ["data/*.json"]
+
 [build-system]
 requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
