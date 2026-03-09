@@ -1,0 +1,68 @@
+[
+  {
+    "EventId": "event-001",
+    "EventName": "DescribeInstances",
+    "EventTime": "2026-03-01T10:00:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:00:00Z\",\"eventSource\":\"ec2.amazonaws.com\",\"eventName\":\"DescribeInstances\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-cli/2.0\",\"requestParameters\":{\"instancesSet\":{},\"filterSet\":{}},\"responseElements\":null,\"readOnly\":true,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-002",
+    "EventName": "DescribeSecurityGroups",
+    "EventTime": "2026-03-01T10:01:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:01:00Z\",\"eventSource\":\"ec2.amazonaws.com\",\"eventName\":\"DescribeSecurityGroups\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-cli/2.0\",\"requestParameters\":null,\"responseElements\":null,\"readOnly\":true,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-003",
+    "EventName": "GetObject",
+    "EventTime": "2026-03-01T10:05:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:05:00Z\",\"eventSource\":\"s3.amazonaws.com\",\"eventName\":\"GetObject\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-sdk-python/1.0\",\"requestParameters\":{\"bucketName\":\"my-app-bucket\",\"key\":\"data/file.csv\"},\"responseElements\":null,\"readOnly\":true,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-004",
+    "EventName": "PutObject",
+    "EventTime": "2026-03-01T10:10:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:10:00Z\",\"eventSource\":\"s3.amazonaws.com\",\"eventName\":\"PutObject\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-sdk-python/1.0\",\"requestParameters\":{\"bucketName\":\"my-app-bucket\",\"key\":\"output/result.json\"},\"responseElements\":null,\"readOnly\":false,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-005",
+    "EventName": "CreateRole",
+    "EventTime": "2026-03-01T10:15:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:15:00Z\",\"eventSource\":\"iam.amazonaws.com\",\"eventName\":\"CreateRole\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-cli/2.0\",\"requestParameters\":{\"roleName\":\"NewRole\"},\"responseElements\":{\"role\":{\"arn\":\"arn:aws:iam::123456789012:role/NewRole\"}},\"resources\":[{\"ARN\":\"arn:aws:iam::123456789012:role/NewRole\",\"accountId\":\"123456789012\",\"type\":\"AWS::IAM::Role\"}],\"readOnly\":false,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-006",
+    "EventName": "AssumeRole",
+    "EventTime": "2026-03-01T09:55:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T09:55:00Z\",\"eventSource\":\"sts.amazonaws.com\",\"eventName\":\"AssumeRole\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-cli/2.0\",\"requestParameters\":{\"roleArn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"roleSessionName\":\"session\"},\"responseElements\":null,\"readOnly\":false,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-007",
+    "EventName": "ListBuckets",
+    "EventTime": "2026-03-01T10:20:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:20:00Z\",\"eventSource\":\"s3.amazonaws.com\",\"eventName\":\"ListBuckets\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-cli/2.0\",\"requestParameters\":null,\"responseElements\":null,\"readOnly\":true,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-008",
+    "EventName": "Decrypt",
+    "EventTime": "2026-03-01T10:06:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:06:00Z\",\"eventSource\":\"kms.amazonaws.com\",\"eventName\":\"Decrypt\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-sdk-python/1.0\",\"requestParameters\":{\"encryptionContext\":{\"aws:s3:arn\":\"arn:aws:s3:::my-app-bucket/data/file.csv\"}},\"responseElements\":null,\"resources\":[{\"ARN\":\"arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012\",\"accountId\":\"123456789012\",\"type\":\"AWS::KMS::Key\"}],\"readOnly\":true,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-009",
+    "EventName": "PutLogEvents",
+    "EventTime": "2026-03-01T10:12:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:12:00Z\",\"eventSource\":\"logs.amazonaws.com\",\"eventName\":\"PutLogEvents\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-sdk-python/1.0\",\"requestParameters\":{\"logGroupName\":\"/app/my-service\",\"logStreamName\":\"stream-001\"},\"responseElements\":null,\"readOnly\":false,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-010",
+    "EventName": "DescribeAlarms",
+    "EventTime": "2026-03-01T10:25:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:25:00Z\",\"eventSource\":\"monitoring.amazonaws.com\",\"eventName\":\"DescribeAlarms\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-cli/2.0\",\"requestParameters\":null,\"responseElements\":null,\"readOnly\":true,\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  },
+  {
+    "EventId": "event-011",
+    "EventName": "GetObject",
+    "EventTime": "2026-03-01T10:30:00Z",
+    "CloudTrailEvent": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"AssumedRole\",\"principalId\":\"AROA1234567890:session\",\"arn\":\"arn:aws:sts::123456789012:assumed-role/MyAppRole/session\",\"accountId\":\"123456789012\",\"sessionContext\":{\"sessionIssuer\":{\"type\":\"Role\",\"principalId\":\"AROA1234567890\",\"arn\":\"arn:aws:iam::123456789012:role/MyAppRole\",\"accountId\":\"123456789012\",\"userName\":\"MyAppRole\"}}},\"eventTime\":\"2026-03-01T10:30:00Z\",\"eventSource\":\"s3.amazonaws.com\",\"eventName\":\"GetObject\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"10.0.0.1\",\"userAgent\":\"aws-sdk-python/1.0\",\"requestParameters\":{\"bucketName\":\"my-app-bucket\",\"key\":\"data/file2.csv\"},\"responseElements\":null,\"readOnly\":true,\"errorCode\":\"AccessDenied\",\"errorMessage\":\"Access Denied\",\"eventType\":\"AwsApiCall\",\"recipientAccountId\":\"123456789012\"}"
+  }
+]
