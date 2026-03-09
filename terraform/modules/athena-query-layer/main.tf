@@ -2,7 +2,7 @@
 
 resource "aws_s3_bucket" "athena_results" {
   bucket        = var.results_bucket_name
-  force_destroy = false
+  force_destroy = true
   tags          = var.tags
 }
 

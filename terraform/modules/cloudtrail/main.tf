@@ -6,7 +6,7 @@ data "aws_partition" "current" {}
 
 resource "aws_s3_bucket" "cloudtrail_logs" {
   bucket        = "${var.project_name}-cloudtrail-logs-${data.aws_caller_identity.current.account_id}"
-  force_destroy = false
+  force_destroy = true
   tags          = var.tags
 }
 
