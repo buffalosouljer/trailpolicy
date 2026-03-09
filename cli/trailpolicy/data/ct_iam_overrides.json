@@ -1,0 +1,17 @@
+{
+  "monitoring.amazonaws.com": "cloudwatch",
+  "elasticmapreduce.amazonaws.com": "elasticmapreduce",
+  "tagging.amazonaws.com": "tag",
+  "models.lex.amazonaws.com": "lex",
+  "runtime.lex.amazonaws.com": "lex",
+  "states.amazonaws.com": "states",
+  "email.amazonaws.com": "ses",
+  "ce.amazonaws.com": "ce",
+  "application-autoscaling.amazonaws.com": "application-autoscaling",
+  "logs.amazonaws.com": "logs",
+  "events.amazonaws.com": "events",
+  "resource-groups.amazonaws.com": "resource-groups",
+  "servicecatalog.amazonaws.com": "servicecatalog",
+  "cognito-identity.amazonaws.com": "cognito-identity",
+  "cognito-idp.amazonaws.com": "cognito-idp"
+}
