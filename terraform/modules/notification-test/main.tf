@@ -29,7 +29,6 @@ resource "aws_sns_topic_subscription" "email" {
 resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${local.function_name}"
   retention_in_days = 14
-  kms_key_id        = var.kms_key_arn
 
   tags = var.tags
 }
