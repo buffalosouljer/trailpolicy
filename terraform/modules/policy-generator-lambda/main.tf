@@ -14,7 +14,7 @@ locals {
 
 resource "aws_s3_bucket" "policies" {
   bucket        = local.bucket_name
-  force_destroy = true
+  force_destroy = var.force_destroy
 
   tags = var.tags
 }
@@ -26,6 +26,38 @@ resource "aws_s3_bucket_public_access_block" "policies" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_versioning" "policies" {
+  bucket = aws_s3_bucket.policies.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_policy" "policies" {
+  bucket     = aws_s3_bucket.policies.id
+  depends_on = [aws_s3_bucket_public_access_block.policies]
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "DenyNonTLS"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.policies.arn,
+          "${aws_s3_bucket.policies.arn}/*"
+        ]
+        Condition = {
+          Bool = { "aws:SecureTransport" = "false" }
+        }
+      }
+    ]
+  })
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "policies" {
@@ -52,6 +84,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "policies" {
     expiration {
       days = var.policy_retention_days
     }
+
+    noncurrent_version_expiration {
+      noncurrent_days = var.policy_retention_days
+    }
   }
 }
 
@@ -62,6 +98,13 @@ resource "aws_cloudwatch_log_group" "lambda" {
   retention_in_days = 14
 
   tags = var.tags
+}
+
+resource "aws_sqs_queue" "lambda_dlq" {
+  name                      = "${local.function_name}-dlq"
+  message_retention_seconds = 1209600 # 14 days
+  kms_master_key_id         = var.kms_key_arn
+  tags                      = var.tags
 }
 
 # --- Lambda IAM Role ---
@@ -96,7 +139,6 @@ resource "aws_iam_role_policy" "lambda_base" {
         Sid    = "CloudWatchLogs"
         Effect = "Allow"
         Action = [
-          "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
@@ -159,6 +201,12 @@ resource "aws_iam_role_policy" "lambda_base" {
           aws_s3_bucket.policies.arn,
           "${aws_s3_bucket.policies.arn}/*"
         ]
+      },
+      {
+        Sid      = "DLQWrite"
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
+        Resource = aws_sqs_queue.lambda_dlq.arn
       }
     ]
   })
@@ -244,13 +292,19 @@ resource "aws_lambda_function" "generator" {
   memory_size   = var.lambda_memory
   filename      = var.lambda_source_path
 
-  source_code_hash = filebase64sha256(var.lambda_source_path)
+  source_code_hash               = fileexists(var.lambda_source_path) ? filebase64sha256(var.lambda_source_path) : null
+  reserved_concurrent_executions = 1
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq.arn
+  }
 
   environment {
     variables = merge(
       {
-        OUTPUT_BUCKET = aws_s3_bucket.policies.id
-        KMS_KEY_ARN   = var.kms_key_arn
+        OUTPUT_BUCKET          = aws_s3_bucket.policies.id
+        KMS_KEY_ARN            = var.kms_key_arn
+        CLOUDTRAIL_BUCKET_NAME = var.cloudtrail_bucket_name
       },
       var.enable_notifications && var.sns_topic_arn != "" ? {
         SNS_TOPIC_ARN = var.sns_topic_arn
@@ -277,6 +331,7 @@ resource "aws_cloudwatch_event_rule" "schedule" {
   name                = "${var.project_name}-policy-generation"
   description         = "Scheduled policy generation for ${length(var.target_role_arns)} roles"
   schedule_expression = var.schedule_expression
+  state               = var.schedule_enabled ? "ENABLED" : "DISABLED"
 
   tags = var.tags
 }

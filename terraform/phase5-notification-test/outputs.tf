@@ -17,3 +17,8 @@ output "lambda_function_name" {
   description = "Name of the notification test Lambda function"
   value       = module.notification_test.lambda_function_name
 }
+
+output "lambda_role_arn" {
+  description = "ARN of the notification test Lambda execution role"
+  value       = module.notification_test.lambda_role_arn
+}

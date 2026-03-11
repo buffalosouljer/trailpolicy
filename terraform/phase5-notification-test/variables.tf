@@ -47,6 +47,11 @@ variable "kms_key_arn" {
 variable "notification_email" {
   description = "Email address to subscribe to the SNS topic for diff reports"
   type        = string
+
+  validation {
+    condition     = can(regex("^[^@]+@[^@]+\\.[^@]+$", var.notification_email))
+    error_message = "notification_email must be a valid email address."
+  }
 }
 
 variable "lambda_source_path" {
@@ -84,7 +89,10 @@ variable "athena_results_bucket_arn" {
   default     = ""
 }
 
-# Phase 1 variables (declared so shared tfvars doesn't error, unused here)
+# ──────────────────────────────────────────────────────────────────────────────
+# Stub variables: declared only so shared terraform.tfvars files do not error.
+# These values are NOT used by this phase. Do not rely on their defaults.
+# ──────────────────────────────────────────────────────────────────────────────
 variable "cloudtrail_trail_name" {
   description = "CloudTrail trail name (used in Phase 1)"
   type        = string
@@ -103,7 +111,6 @@ variable "access_analyzer_type" {
   default     = "ACCOUNT"
 }
 
-# Phase 2 variables (declared so shared tfvars doesn't error, unused here)
 variable "athena_workgroup_name" {
   description = "Athena workgroup name (used in Phase 2)"
   type        = string

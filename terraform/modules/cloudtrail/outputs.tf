@@ -19,6 +19,6 @@ output "cloudtrail_bucket_name" {
 }
 
 output "cloudtrail_s3_prefix" {
-  description = "S3 key prefix under which CloudTrail writes logs"
+  description = "S3 key prefix where CloudTrail writes logs (derived from account ID, no custom s3_key_prefix)"
   value       = "AWSLogs/${data.aws_caller_identity.current.account_id}/CloudTrail"
 }

@@ -31,6 +31,11 @@ variable "kms_key_arn" {
 variable "target_role_arns" {
   description = "List of IAM role ARNs to generate policies for"
   type        = list(string)
+
+  validation {
+    condition     = length(var.target_role_arns) > 0
+    error_message = "target_role_arns must contain at least one IAM role ARN."
+  }
 }
 
 variable "schedule_expression" {
@@ -46,9 +51,14 @@ variable "lookback_days" {
 }
 
 variable "event_source" {
-  description = "Event data source (api or athena)"
+  description = "Data source for CloudTrail events (api or athena)"
   type        = string
   default     = "api"
+
+  validation {
+    condition     = contains(["api", "athena"], var.event_source)
+    error_message = "event_source must be \"api\" or \"athena\"."
+  }
 }
 
 variable "enable_notifications" {
@@ -115,4 +125,16 @@ variable "tags" {
   description = "Common tags applied to all resources"
   type        = map(string)
   default     = {}
+}
+
+variable "force_destroy" {
+  description = "Allow bucket destruction even when non-empty. Must be false in production."
+  type        = bool
+  default     = false
+}
+
+variable "schedule_enabled" {
+  description = "Whether the EventBridge schedule rule is enabled"
+  type        = bool
+  default     = true
 }

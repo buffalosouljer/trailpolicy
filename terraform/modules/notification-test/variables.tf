@@ -11,6 +11,11 @@ variable "environment" {
 variable "notification_email" {
   description = "Email address to subscribe to the SNS topic"
   type        = string
+
+  validation {
+    condition     = can(regex("^[^@]+@[^@]+\\.[^@]+$", var.notification_email))
+    error_message = "notification_email must be a valid email address."
+  }
 }
 
 variable "lambda_source_path" {

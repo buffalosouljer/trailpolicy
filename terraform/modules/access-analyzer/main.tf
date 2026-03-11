@@ -96,7 +96,8 @@ resource "aws_iam_role_policy" "analyzer_service" {
         Sid    = "KMSDecrypt"
         Effect = "Allow"
         Action = [
-          "kms:Decrypt"
+          "kms:Decrypt",
+          "kms:DescribeKey"
         ]
         Resource = var.kms_key_arn
       }

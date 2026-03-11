@@ -77,7 +77,10 @@ variable "results_retention_days" {
   default     = 7
 }
 
-# Phase 1 variables (declared so shared tfvars doesn't error, unused here)
+# ──────────────────────────────────────────────────────────────────────────────
+# Stub variables: declared only so shared terraform.tfvars files do not error.
+# These values are NOT used by this phase. Do not rely on their defaults.
+# ──────────────────────────────────────────────────────────────────────────────
 variable "cloudtrail_trail_name" {
   description = "CloudTrail trail name (used in Phase 1)"
   type        = string

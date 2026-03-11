@@ -50,6 +50,13 @@ variable "trusted_principal_arns" {
   default     = []
 }
 
+variable "executor_external_id" {
+  description = "External ID for the trailpolicy executor role AssumeRole condition. Use a unique, unguessable value."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "enable_cloudwatch_logs" {
   description = "Whether to send CloudTrail events to CloudWatch Logs"
   type        = bool
@@ -66,7 +73,10 @@ variable "archive_rules" {
   default = {}
 }
 
-# Phase 2 variables (declared here so tfvars doesn't error, unused in phase 1)
+# ──────────────────────────────────────────────────────────────────────────────
+# Stub variables: declared only so shared terraform.tfvars files do not error.
+# These values are NOT used by this phase. Do not rely on their defaults.
+# ──────────────────────────────────────────────────────────────────────────────
 variable "athena_workgroup_name" {
   description = "Athena workgroup name (used in Phase 2)"
   type        = string

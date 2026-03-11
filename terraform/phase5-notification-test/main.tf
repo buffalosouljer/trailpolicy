@@ -25,5 +25,5 @@ module "notification_test" {
   athena_workgroup          = var.athena_workgroup
   athena_results_bucket_arn = var.athena_results_bucket_arn
 
-  tags = local.common_tags
+  tags = var.tags
 }

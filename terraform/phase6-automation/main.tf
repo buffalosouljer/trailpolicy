@@ -20,6 +20,7 @@ module "policy_generator" {
   schedule_expression    = var.schedule_expression
   lookback_days          = var.lookback_days
   event_source           = var.event_source
+  schedule_enabled       = var.schedule_enabled
 
   # Notifications
   enable_notifications = var.enable_notifications
@@ -34,6 +35,7 @@ module "policy_generator" {
 
   # Tuning
   policy_retention_days = var.policy_retention_days
+  force_destroy         = true
 
-  tags = local.common_tags
+  tags = var.tags
 }

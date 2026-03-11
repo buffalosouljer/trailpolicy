@@ -22,3 +22,13 @@ output "eventbridge_rule_name" {
   description = "Name of the EventBridge schedule rule"
   value       = module.policy_generator.eventbridge_rule_name
 }
+
+output "lambda_role_arn" {
+  description = "ARN of the policy generator Lambda execution role"
+  value       = module.policy_generator.lambda_role_arn
+}
+
+output "eventbridge_rule_arn" {
+  description = "ARN of the EventBridge schedule rule"
+  value       = module.policy_generator.eventbridge_rule_arn
+}

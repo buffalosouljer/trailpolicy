@@ -70,6 +70,17 @@ variable "event_source" {
   description = "Event data source (api or athena)"
   type        = string
   default     = "api"
+
+  validation {
+    condition     = contains(["api", "athena"], var.event_source)
+    error_message = "event_source must be \"api\" or \"athena\"."
+  }
+}
+
+variable "schedule_enabled" {
+  description = "Whether the EventBridge schedule rule is enabled"
+  type        = bool
+  default     = true
 }
 
 variable "enable_notifications" {
@@ -120,7 +131,10 @@ variable "policy_retention_days" {
   default     = 90
 }
 
-# Phase 1 variables (declared so shared tfvars doesn't error, unused here)
+# ──────────────────────────────────────────────────────────────────────────────
+# Stub variables: declared only so shared terraform.tfvars files do not error.
+# These values are NOT used by this phase. Do not rely on their defaults.
+# ──────────────────────────────────────────────────────────────────────────────
 variable "cloudtrail_trail_name" {
   description = "CloudTrail trail name (used in Phase 1)"
   type        = string
@@ -139,7 +153,6 @@ variable "access_analyzer_type" {
   default     = "ACCOUNT"
 }
 
-# Phase 2 variables (declared so shared tfvars doesn't error, unused here)
 variable "athena_workgroup_name" {
   description = "Athena workgroup name (used in Phase 2)"
   type        = string
