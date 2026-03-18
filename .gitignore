@@ -23,7 +23,7 @@ venv/
 .pytest_cache/
 
 # Lambda packaging
-lambda/package/
+**/lambda/package/
 *.zip
 
 # IDE
