@@ -123,6 +123,43 @@ def test_format_diff_text_passrole_note():
     assert "not tracked by CloudTrail" in text
 
 
+def test_extract_actions_not_action_logged():
+    """NotAction statements should not crash; they are logged as warnings."""
+    policy = {
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "NotAction": ["iam:*"],
+                "Resource": "*",
+            },
+            {
+                "Effect": "Allow",
+                "Action": ["s3:GetObject"],
+                "Resource": "*",
+            },
+        ]
+    }
+    actions = _extract_actions(policy)
+    # NotAction doesn't contribute explicit actions but shouldn't crash
+    assert "s3:GetObject" in actions
+    # iam:* should NOT be in the set (it's excluded, not included)
+    assert "iam:*" not in actions
+
+
+def test_extract_actions_empty_statement():
+    """Statement with no Action or NotAction should be handled gracefully."""
+    policy = {
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Resource": "*",
+            }
+        ]
+    }
+    actions = _extract_actions(policy)
+    assert actions == set()
+
+
 def test_format_diff_text_summary_section():
     diff = DiffResult(
         matched=["a:B", "c:D"],

@@ -34,7 +34,7 @@ resource "aws_sns_topic_policy" "notifications" {
         Sid    = "AllowLambdaPublish"
         Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.lambda.arn
+          AWS = concat([aws_iam_role.lambda.arn], var.additional_publisher_arns)
         }
         Action   = "sns:Publish"
         Resource = aws_sns_topic.notifications.arn
@@ -48,6 +48,7 @@ resource "aws_sns_topic_policy" "notifications" {
 resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${local.function_name}"
   retention_in_days = 14
+  kms_key_id        = var.kms_key_arn
 
   tags = var.tags
 }
@@ -206,6 +207,8 @@ resource "aws_lambda_function" "notification_test" {
   filename      = var.lambda_source_path
 
   source_code_hash = fileexists(var.lambda_source_path) ? filebase64sha256(var.lambda_source_path) : null
+
+  reserved_concurrent_executions = 1
 
   environment {
     variables = merge(

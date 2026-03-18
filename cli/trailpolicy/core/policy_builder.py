@@ -92,7 +92,14 @@ def build_policy(
     metadata.policy_size = len(policy_json)
 
     if metadata.policy_size > MAX_POLICY_SIZE:
-        policy, metadata.policy_size = _compress_policy(policy)
+        policy, metadata.policy_size, introduced_wildcards = _compress_policy(policy)
+        if introduced_wildcards:
+            metadata.wildcard_actions.extend(introduced_wildcards)
+            metadata.warnings.append(
+                f"Policy compressed: {len(introduced_wildcards)} wildcard(s) "
+                f"introduced to reduce size: {', '.join(sorted(introduced_wildcards))}. "
+                "Review these — they broaden permissions beyond observed usage."
+            )
         if metadata.policy_size > MAX_POLICY_SIZE:
             metadata.warnings.append(
                 f"Policy size ({metadata.policy_size} chars) exceeds "
@@ -103,9 +110,9 @@ def build_policy(
     # 6. Compute stats
     all_actions = set()
     all_services = set()
-    for actions in action_resources:
-        all_actions.add(actions)
-        all_services.add(actions.split(":")[0])
+    for action in action_resources:
+        all_actions.add(action)
+        all_services.add(action.split(":")[0])
     metadata.total_actions = len(all_actions)
     metadata.total_services = len(all_services)
 
@@ -166,13 +173,17 @@ def _generate_sid(actions: list[str], used_sids: set[str]) -> str:
     return sid
 
 
-def _compress_policy(policy: dict) -> tuple[dict, int]:
+def _compress_policy(policy: dict) -> tuple[dict, int, list[str]]:
     """Attempt to reduce policy size by consolidating actions with wildcards.
 
     Strategy: For services with >5 actions sharing a common prefix pattern,
     consolidate to a wildcard (e.g., s3:Get* instead of listing each).
+
+    Returns:
+        Tuple of (compressed_policy, size, list_of_introduced_wildcard_actions).
     """
     new_statements = []
+    introduced_wildcards: list[str] = []
     for stmt in policy["Statement"]:
         actions = stmt["Action"] if isinstance(stmt["Action"], list) else [stmt["Action"]]
 
@@ -187,7 +198,10 @@ def _compress_policy(policy: dict) -> tuple[dict, int]:
             if len(names) > 5:
                 # Find common prefixes
                 prefixes = _find_common_prefixes(names)
-                compressed_actions.extend(f"{svc}:{p}*" for p in prefixes)
+                for p in prefixes:
+                    wildcard = f"{svc}:{p}*"
+                    compressed_actions.append(wildcard)
+                    introduced_wildcards.append(wildcard)
             else:
                 compressed_actions.extend(f"{svc}:{n}" for n in names)
 
@@ -197,7 +211,7 @@ def _compress_policy(policy: dict) -> tuple[dict, int]:
 
     policy = {"Version": "2012-10-17", "Statement": new_statements}
     size = len(json.dumps(policy, separators=(",", ":")))
-    return policy, size
+    return policy, size, introduced_wildcards
 
 
 def _find_common_prefixes(names: list[str]) -> list[str]:

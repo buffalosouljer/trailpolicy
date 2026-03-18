@@ -36,11 +36,12 @@ variable "kms_key_arn" {
 }
 
 variable "archive_rules" {
-  description = "Map of archive rule name to filter criteria"
+  description = "Map of archive rule name to filter criteria. Operator defaults to 'eq'; use 'exists' for boolean fields like isPublic."
   type = map(object({
     filter_resource_type = string
     filter_condition     = string
     filter_value         = string
+    filter_operator      = optional(string, "eq")
   }))
   default = {}
 }

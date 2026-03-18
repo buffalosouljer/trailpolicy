@@ -75,6 +75,59 @@ class TestParseEvents:
         assert s3_get[0].request_parameters.get("bucketName") == "my-app-bucket"
 
 
+    def test_cross_role_assume_kept(self):
+        """AssumeRole for a DIFFERENT role should not be filtered."""
+        raw_event = {
+            "eventSource": "sts.amazonaws.com",
+            "eventName": "AssumeRole",
+            "awsRegion": "us-east-1",
+            "recipientAccountId": "123456789012",
+            "userIdentity": {
+                "arn": "arn:aws:sts::123456789012:assumed-role/SourceRole/session",
+                "accountId": "123456789012",
+            },
+            "requestParameters": {
+                "roleArn": "arn:aws:iam::123456789012:role/TargetRole",
+                "roleSessionName": "session",
+            },
+        }
+        parsed = parse_events([raw_event])
+        assert len(parsed) == 1
+        assert parsed[0].event_name == "AssumeRole"
+
+    def test_raw_dict_event_parsing(self):
+        """Events without CloudTrailEvent wrapper (Athena format) should parse."""
+        raw_event = {
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "GetObject",
+            "awsRegion": "us-east-1",
+            "recipientAccountId": "123456789012",
+            "requestParameters": {"bucketName": "test-bucket", "key": "file.txt"},
+            "readOnly": "true",
+            "eventTime": "2026-03-01T10:00:00Z",
+        }
+        parsed = parse_events([raw_event])
+        assert len(parsed) == 1
+        assert parsed[0].event_source == "s3.amazonaws.com"
+        assert parsed[0].event_name == "GetObject"
+        assert parsed[0].request_parameters["bucketName"] == "test-bucket"
+        assert parsed[0].read_only is True
+
+    def test_request_parameters_as_json_string(self):
+        """requestParameters that is a JSON string should be parsed to dict."""
+        raw_event = {
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "ListBuckets",
+            "awsRegion": "us-east-1",
+            "recipientAccountId": "123456789012",
+            "requestParameters": '{"bucketName": "my-bucket"}',
+        }
+        parsed = parse_events([raw_event])
+        assert len(parsed) == 1
+        assert isinstance(parsed[0].request_parameters, dict)
+        assert parsed[0].request_parameters["bucketName"] == "my-bucket"
+
+
 class TestIsSameRole:
     def test_same_role_assumed(self):
         assert _is_same_role(

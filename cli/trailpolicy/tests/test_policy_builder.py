@@ -3,7 +3,12 @@
 import json
 
 from trailpolicy.core.event_parser import ParsedEvent
-from trailpolicy.core.policy_builder import build_policy, PolicyMetadata
+from trailpolicy.core.policy_builder import (
+    build_policy,
+    PolicyMetadata,
+    _compress_policy,
+    _find_common_prefixes,
+)
 
 
 def _make_event(service: str, action: str, resources: list[str] | None = None) -> ParsedEvent:
@@ -138,3 +143,95 @@ class TestBuildPolicy:
         ]
         policy, meta = build_policy(events)
         assert meta.total_actions == 1
+
+    def test_empty_events_no_passrole_warning(self):
+        """Empty-policy early-return should not emit the PassRole warning."""
+        policy, meta = build_policy([])
+        assert not any("PassRole" in w for w in meta.warnings)
+
+
+class TestCompressPolicy:
+    def test_compresses_many_actions(self):
+        """When >5 actions share a service, they should be compressed."""
+        policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "S3Access",
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:GetObject",
+                        "s3:GetBucketAcl",
+                        "s3:GetBucketPolicy",
+                        "s3:GetBucketLocation",
+                        "s3:GetObjectVersion",
+                        "s3:GetObjectAcl",
+                        "s3:PutObject",
+                        "s3:PutBucketPolicy",
+                    ],
+                    "Resource": "*",
+                }
+            ],
+        }
+        compressed, size, wildcards = _compress_policy(policy)
+        actions = compressed["Statement"][0]["Action"]
+        if isinstance(actions, str):
+            actions = [actions]
+        # Get* should be compressed to Get* since there are 5 Get actions
+        assert any("*" in a for a in actions)
+        assert len(wildcards) > 0
+
+    def test_compress_returns_introduced_wildcards(self):
+        """Wildcards list should contain the exact patterns introduced."""
+        policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "Test",
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:GetObject",
+                        "s3:GetBucketAcl",
+                        "s3:GetBucketPolicy",
+                        "s3:GetBucketLocation",
+                        "s3:GetObjectVersion",
+                        "s3:GetObjectAcl",
+                    ],
+                    "Resource": "*",
+                }
+            ],
+        }
+        _, _, wildcards = _compress_policy(policy)
+        assert "s3:Get*" in wildcards
+
+    def test_no_compress_few_actions(self):
+        """Fewer than 6 actions should not be compressed."""
+        policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "Test",
+                    "Effect": "Allow",
+                    "Action": ["s3:GetObject", "s3:PutObject"],
+                    "Resource": "*",
+                }
+            ],
+        }
+        compressed, size, wildcards = _compress_policy(policy)
+        actions = compressed["Statement"][0]["Action"]
+        if isinstance(actions, str):
+            actions = [actions]
+        assert not any("*" in a for a in actions)
+        assert len(wildcards) == 0
+
+
+class TestFindCommonPrefixes:
+    def test_groups_get_prefix(self):
+        names = ["GetObject", "GetBucketAcl", "GetBucketPolicy"]
+        result = _find_common_prefixes(names)
+        assert result == ["Get"]
+
+    def test_no_group_small_count(self):
+        names = ["GetObject", "PutObject"]
+        result = _find_common_prefixes(names)
+        assert sorted(result) == sorted(["GetObject", "PutObject"])

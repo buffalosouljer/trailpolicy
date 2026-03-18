@@ -96,6 +96,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "policies" {
 resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${local.function_name}"
   retention_in_days = 14
+  kms_key_id        = var.kms_key_arn
 
   tags = var.tags
 }

@@ -55,6 +55,17 @@ variable "executor_external_id" {
   type        = string
   default     = ""
   sensitive   = true
+
+  validation {
+    condition     = var.executor_external_id == "" || length(var.executor_external_id) >= 12
+    error_message = "executor_external_id should be empty (uses project_name fallback) or at least 12 characters for confused-deputy protection."
+  }
+}
+
+variable "force_destroy" {
+  description = "Allow S3 buckets to be destroyed even when non-empty. Must be false in production."
+  type        = bool
+  default     = false
 }
 
 variable "enable_cloudwatch_logs" {

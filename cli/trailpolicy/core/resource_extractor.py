@@ -7,13 +7,6 @@ from .event_parser import ParsedEvent
 
 logger = logging.getLogger(__name__)
 
-# Actions that only support Resource: "*" (no resource-level permissions)
-WILDCARD_ONLY_PREFIXES = (
-    "Describe",
-    "List",
-    "Get",
-)
-
 # Service-specific extractors for events that don't populate resources[]
 _S3_PARAM_KEYS = ("bucketName", "bucket")
 _DYNAMODB_PARAM_KEYS = ("tableName",)

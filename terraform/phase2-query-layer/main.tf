@@ -24,6 +24,6 @@ module "athena_query_layer" {
   results_bucket_name    = var.athena_results_bucket_name
   bytes_scanned_limit    = var.bytes_scanned_limit
   results_retention_days = var.results_retention_days
-  force_destroy          = true
+  force_destroy          = var.force_destroy
   tags                   = var.tags
 }

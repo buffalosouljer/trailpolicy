@@ -35,7 +35,7 @@ module "policy_generator" {
 
   # Tuning
   policy_retention_days = var.policy_retention_days
-  force_destroy         = true
+  force_destroy         = var.force_destroy
 
   tags = var.tags
 }

@@ -26,7 +26,8 @@ resource "aws_accessanalyzer_archive_rule" "this" {
 
   filter {
     criteria = each.value.filter_condition
-    eq       = [each.value.filter_value]
+    eq       = each.value.filter_operator == "eq" ? [each.value.filter_value] : null
+    exists   = each.value.filter_operator == "exists" ? each.value.filter_value : null
   }
 }
 

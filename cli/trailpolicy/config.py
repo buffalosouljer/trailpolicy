@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import logging
+import os
+
 import boto3
 from botocore.config import Config
+
+logger = logging.getLogger(__name__)
 
 # Constants
 MAX_LOOKBACK_DAYS = 90
@@ -36,7 +41,10 @@ def detect_partition(region: str | None = None) -> str:
         return "aws"
 
     # Auto-detect from credentials
-    sts = boto3.client("sts", config=BOTO_CONFIG)
+    # Use regional STS endpoint if region is available from env to avoid
+    # routing issues in GovCloud/China partitions.
+    sts_region = os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION")
+    sts = boto3.client("sts", region_name=sts_region, config=BOTO_CONFIG)
     identity = sts.get_caller_identity()
     arn = identity["Arn"]
     # ARN format: arn:{partition}:iam::...

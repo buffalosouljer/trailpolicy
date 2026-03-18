@@ -68,6 +68,12 @@ variable "enable_athena_source" {
   default     = false
 }
 
+variable "additional_publisher_arns" {
+  description = "Additional IAM role ARNs allowed to publish to the SNS topic (e.g., Phase 6 Lambda)"
+  type        = list(string)
+  default     = []
+}
+
 variable "lambda_timeout" {
   description = "Lambda function timeout in seconds"
   type        = number

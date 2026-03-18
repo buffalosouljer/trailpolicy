@@ -125,6 +125,12 @@ variable "athena_results_bucket_arn" {
   default     = ""
 }
 
+variable "force_destroy" {
+  description = "Allow S3 buckets to be destroyed even when non-empty. Must be false in production."
+  type        = bool
+  default     = false
+}
+
 variable "policy_retention_days" {
   description = "Days to retain generated policies in S3"
   type        = number

@@ -65,6 +65,12 @@ variable "athena_results_bucket_name" {
   type        = string
 }
 
+variable "force_destroy" {
+  description = "Allow S3 buckets/workgroups to be destroyed even when non-empty. Must be false in production."
+  type        = bool
+  default     = false
+}
+
 variable "bytes_scanned_limit" {
   description = "Max bytes scanned per query for cost control"
   type        = number

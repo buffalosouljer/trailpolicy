@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 
+def _hcl_escape(value: str) -> str:
+    """Escape a string for safe embedding in HCL double-quoted strings."""
+    return value.replace("\\", "\\\\").replace('"', '\\"').replace("${", "$${")
+
+
 def format_policy_terraform(policy: dict) -> str:
     """Convert a policy document to a Terraform data source block.
 
@@ -19,8 +24,8 @@ def format_policy_terraform(policy: dict) -> str:
         lines.append("  statement {")
 
         if "Sid" in stmt:
-            lines.append(f'    sid    = "{stmt["Sid"]}"')
-        lines.append(f'    effect = "{stmt.get("Effect", "Allow")}"')
+            lines.append(f'    sid    = "{_hcl_escape(stmt["Sid"])}"')
+        lines.append(f'    effect = "{_hcl_escape(stmt.get("Effect", "Allow"))}"')
 
         # Actions
         actions = stmt.get("Action", [])
@@ -29,7 +34,7 @@ def format_policy_terraform(policy: dict) -> str:
         lines.append("")
         lines.append("    actions = [")
         for action in sorted(actions):
-            lines.append(f'      "{action}",')
+            lines.append(f'      "{_hcl_escape(action)}",')
         lines.append("    ]")
 
         # Resources
@@ -39,7 +44,7 @@ def format_policy_terraform(policy: dict) -> str:
         lines.append("")
         lines.append("    resources = [")
         for resource in sorted(resources):
-            lines.append(f'      "{resource}",')
+            lines.append(f'      "{_hcl_escape(resource)}",')
         lines.append("    ]")
 
         # Conditions
@@ -50,12 +55,12 @@ def format_policy_terraform(policy: dict) -> str:
                         values = [values]
                     lines.append("")
                     lines.append("    condition {")
-                    lines.append(f'      test     = "{operator}"')
-                    lines.append(f'      variable = "{key}"')
+                    lines.append(f'      test     = "{_hcl_escape(operator)}"')
+                    lines.append(f'      variable = "{_hcl_escape(key)}"')
                     lines.append("")
                     lines.append("      values = [")
                     for val in values:
-                        lines.append(f'        "{val}",')
+                        lines.append(f'        "{_hcl_escape(val)}",')
                     lines.append("      ]")
                     lines.append("    }")
 

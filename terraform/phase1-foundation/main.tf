@@ -62,6 +62,11 @@ resource "aws_kms_key" "cloudtrail" {
           "kms:DescribeKey"
         ]
         Resource = "*"
+        Condition = {
+          StringLike = {
+            "kms:EncryptionContext:aws:cloudtrail:arn" = "arn:${local.partition}:cloudtrail:*:${local.account_id}:trail/*"
+          }
+        }
       },
       {
         Sid    = "AllowCloudWatchLogsEncrypt"
@@ -104,7 +109,7 @@ module "cloudtrail" {
   trail_name             = var.cloudtrail_trail_name
   kms_key_arn            = aws_kms_key.cloudtrail.arn
   enable_cloudwatch_logs = var.enable_cloudwatch_logs
-  force_destroy          = true
+  force_destroy          = var.force_destroy
   tags                   = var.tags
 }
 

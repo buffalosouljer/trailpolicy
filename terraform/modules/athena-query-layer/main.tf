@@ -262,7 +262,7 @@ resource "aws_glue_catalog_table" "cloudtrail" {
 
 resource "aws_athena_workgroup" "this" {
   name          = var.workgroup_name
-  force_destroy = true
+  force_destroy = var.force_destroy
 
   configuration {
     enforce_workgroup_configuration = true

@@ -187,13 +187,33 @@ def _get_inline_policy_actions(
 
 
 def _extract_actions(policy_doc: dict) -> set[str]:
-    """Extract all Allow actions from a policy document."""
+    """Extract all Allow actions from a policy document.
+
+    Handles both Action and NotAction. NotAction statements are logged as
+    warnings since they grant broad permissions that cannot be precisely
+    enumerated without a full AWS action catalog.
+    """
     actions = set()
     for stmt in policy_doc.get("Statement", []):
         if stmt.get("Effect") != "Allow":
             continue
+
+        # Handle standard Action
         stmt_actions = stmt.get("Action", [])
         if isinstance(stmt_actions, str):
             stmt_actions = [stmt_actions]
         actions.update(stmt_actions)
+
+        # Handle NotAction — log warning since we can't expand the inverse
+        not_actions = stmt.get("NotAction", [])
+        if not_actions:
+            if isinstance(not_actions, str):
+                not_actions = [not_actions]
+            logger.warning(
+                "Statement uses NotAction (excludes %s) — this grants all "
+                "other actions and cannot be precisely diffed. The diff may "
+                "undercount current permissions.",
+                ", ".join(not_actions),
+            )
+
     return actions
