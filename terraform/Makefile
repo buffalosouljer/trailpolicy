@@ -1,7 +1,7 @@
 PHASE ?= phase1-foundation
 ORG ?= org-sbx
 
-.PHONY: init plan apply destroy bootstrap fmt validate
+.PHONY: init plan apply destroy bootstrap package fmt validate
 
 init:
 	cd $(PHASE) && terraform init -reconfigure \
@@ -24,6 +24,9 @@ bootstrap:
 	cd phase0-bootstrap && terraform init && \
 	terraform apply -input=false \
 	  -var="org_name=$(ORG)" -var="aws_region=us-gov-west-1"
+
+package:
+	../scripts/build-lambda.sh $(PHASE)
 
 fmt:
 	terraform fmt -recursive
