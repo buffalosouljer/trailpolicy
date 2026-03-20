@@ -18,6 +18,9 @@ lambda = []
 [project.scripts]
 trailpolicy = "trailpolicy.cli:main"
 
+[tool.setuptools.packages.find]
+exclude = ["trailpolicy.tests*"]
+
 [tool.setuptools.package-data]
 trailpolicy = ["data/*.json"]
 

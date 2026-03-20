@@ -17,3 +17,8 @@ output "athena_results_bucket_arn" {
   description = "ARN of the Athena results S3 bucket"
   value       = module.athena_query_layer.athena_results_bucket_arn
 }
+
+output "athena_results_bucket_name" {
+  description = "Name of the Athena results S3 bucket"
+  value       = module.athena_query_layer.athena_results_bucket_name
+}

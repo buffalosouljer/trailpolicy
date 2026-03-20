@@ -42,3 +42,8 @@ output "trailpolicy_executor_role_name" {
   description = "Name of the trailpolicy executor IAM role"
   value       = aws_iam_role.trailpolicy_executor.name
 }
+
+output "analyzer_service_role_arn" {
+  description = "ARN of the Access Analyzer service-linked role (empty if disabled)"
+  value       = module.access_analyzer.analyzer_service_role_arn
+}

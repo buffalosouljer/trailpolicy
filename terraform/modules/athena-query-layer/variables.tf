@@ -65,3 +65,21 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "force_destroy" {
+  description = "Allow bucket destruction even when non-empty. Must be false in production."
+  type        = bool
+  default     = false
+}
+
+variable "table_name" {
+  description = "Name of the Glue catalog table for CloudTrail logs"
+  type        = string
+  default     = "cloudtrail_logs"
+}
+
+variable "projection_year_end" {
+  description = "End year for partition projection range (e.g., 2040)"
+  type        = string
+  default     = "2040"
+}

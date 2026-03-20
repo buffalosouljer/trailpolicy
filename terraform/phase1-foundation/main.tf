@@ -52,15 +52,6 @@ resource "aws_kms_key" "cloudtrail" {
         }
       },
       {
-        Sid    = "AllowCloudTrailDescribe"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudtrail.amazonaws.com"
-        }
-        Action   = "kms:DescribeKey"
-        Resource = "*"
-      },
-      {
         Sid    = "AllowTrailpolicyDecrypt"
         Effect = "Allow"
         Principal = {
@@ -71,6 +62,31 @@ resource "aws_kms_key" "cloudtrail" {
           "kms:DescribeKey"
         ]
         Resource = "*"
+        Condition = {
+          StringLike = {
+            "kms:EncryptionContext:aws:cloudtrail:arn" = "arn:${local.partition}:cloudtrail:*:${local.account_id}:trail/*"
+          }
+        }
+      },
+      {
+        Sid    = "AllowCloudWatchLogsEncrypt"
+        Effect = "Allow"
+        Principal = {
+          Service = "logs.${local.region}.amazonaws.com"
+        }
+        Action = [
+          "kms:Encrypt*",
+          "kms:Decrypt*",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+        Condition = {
+          ArnLike = {
+            "kms:EncryptionContext:aws:logs:arn" = "arn:${local.partition}:logs:${local.region}:${local.account_id}:log-group:*"
+          }
+        }
       }
     ]
   })
@@ -93,7 +109,8 @@ module "cloudtrail" {
   trail_name             = var.cloudtrail_trail_name
   kms_key_arn            = aws_kms_key.cloudtrail.arn
   enable_cloudwatch_logs = var.enable_cloudwatch_logs
-  tags                   = local.common_tags
+  force_destroy          = var.force_destroy
+  tags                   = var.tags
 }
 
 # --- Access Analyzer Module ---
@@ -108,7 +125,7 @@ module "access_analyzer" {
   cloudtrail_bucket_arn = module.cloudtrail.cloudtrail_bucket_arn
   kms_key_arn           = aws_kms_key.cloudtrail.arn
   archive_rules         = var.archive_rules
-  tags                  = local.common_tags
+  tags                  = var.tags
 }
 
 # --- trailpolicy Executor Role ---
@@ -127,7 +144,7 @@ resource "aws_iam_role" "trailpolicy_executor" {
         Action = "sts:AssumeRole"
         Condition = {
           StringEquals = {
-            "sts:ExternalId" = var.project_name
+            "sts:ExternalId" = var.executor_external_id != "" ? var.executor_external_id : var.project_name
           }
         }
       }
@@ -197,7 +214,7 @@ resource "aws_iam_role_policy" "trailpolicy_executor" {
           "athena:GetQueryExecution",
           "athena:GetQueryResults"
         ]
-        Resource = "arn:${local.partition}:athena:${local.region}:${local.account_id}:workgroup/${var.project_name}-workgroup"
+        Resource = "arn:${local.partition}:athena:${local.region}:${local.account_id}:workgroup/${var.athena_workgroup_name != "" ? var.athena_workgroup_name : "${var.project_name}-workgroup"}"
       },
       {
         Sid    = "GlueCatalog"
@@ -208,8 +225,8 @@ resource "aws_iam_role_policy" "trailpolicy_executor" {
         ]
         Resource = [
           "arn:${local.partition}:glue:${local.region}:${local.account_id}:catalog",
-          "arn:${local.partition}:glue:${local.region}:${local.account_id}:database/${var.project_name}_cloudtrail",
-          "arn:${local.partition}:glue:${local.region}:${local.account_id}:table/${var.project_name}_cloudtrail/*"
+          "arn:${local.partition}:glue:${local.region}:${local.account_id}:database/${var.athena_database_name != "" ? var.athena_database_name : "${var.project_name}_cloudtrail"}",
+          "arn:${local.partition}:glue:${local.region}:${local.account_id}:table/${var.athena_database_name != "" ? var.athena_database_name : "${var.project_name}_cloudtrail"}/*"
         ]
       }
     ]

@@ -279,6 +279,45 @@ class TestValidate:
             os.unlink(fpath)
 
 
+class TestDiff:
+    """Tests for the diff command."""
+
+    @patch("trailpolicy.cli.compute_diff")
+    @patch("trailpolicy.cli.detect_partition", return_value="aws")
+    @patch("trailpolicy.cli.fetch_events", return_value=SAMPLE_RAW_EVENTS)
+    def test_diff_happy_path(self, mock_fetch, mock_partition, mock_diff):
+        from trailpolicy.output.diff_reporter import DiffResult
+
+        mock_diff.return_value = DiffResult(
+            matched=["s3:GetObject"],
+            unused=["s3:PutObject"],
+            missing=["ec2:DescribeInstances"],
+            current_action_count=2,
+            observed_action_count=2,
+            coverage_pct=50,
+        )
+        runner = CliRunner()
+        result = runner.invoke(
+            main, ["diff", "--role-arn", ROLE_ARN]
+        )
+        assert result.exit_code == 0
+        assert "MATCHED" in result.output or "UNUSED" in result.output
+
+    @patch("trailpolicy.cli.detect_partition", return_value="aws")
+    @patch("trailpolicy.cli.fetch_events", return_value=[])
+    def test_diff_no_events_exits(self, mock_fetch, mock_partition):
+        runner = CliRunner()
+        result = runner.invoke(
+            main, ["diff", "--role-arn", ROLE_ARN]
+        )
+        assert result.exit_code == 1
+
+    def test_diff_missing_role_arn(self):
+        runner = CliRunner()
+        result = runner.invoke(main, ["diff"])
+        assert result.exit_code != 0
+
+
 class TestVersionAndHelp:
     """Tests for --version and --help flags."""
 

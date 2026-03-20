@@ -42,7 +42,9 @@ def get_last_accessed(
     job_id = response["JobId"]
     logger.info("Started Access Advisor job %s for %s", job_id, role_arn)
 
-    # Poll until complete
+    # Poll until complete (120s timeout)
+    timeout_secs = 120
+    start_time = time.monotonic()
     while True:
         result = client.get_service_last_accessed_details(JobId=job_id)
         status = result["JobStatus"]
@@ -52,11 +54,26 @@ def get_last_accessed(
             error = result.get("Error", {}).get("Message", "Unknown error")
             logger.error("Access Advisor job failed: %s", error)
             return []
+        if time.monotonic() - start_time > timeout_secs:
+            logger.error(
+                "Access Advisor job %s timed out after %ds", job_id, timeout_secs
+            )
+            raise TimeoutError(
+                f"Access Advisor job did not complete within {timeout_secs}s"
+            )
         time.sleep(1)
+
+    # Paginate results (API returns up to 100 services per page)
+    all_services_raw = list(result.get("ServicesLastAccessed", []))
+    while result.get("IsTruncated"):
+        result = client.get_service_last_accessed_details(
+            JobId=job_id, Marker=result["Marker"]
+        )
+        all_services_raw.extend(result.get("ServicesLastAccessed", []))
 
     # Parse results
     services = []
-    for svc in result.get("ServicesLastAccessed", []):
+    for svc in all_services_raw:
         last_auth = svc.get("LastAuthenticated")
         if last_auth and not isinstance(last_auth, datetime):
             try:

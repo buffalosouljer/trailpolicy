@@ -24,11 +24,31 @@ resource "aws_sns_topic_subscription" "email" {
   endpoint  = var.notification_email
 }
 
+resource "aws_sns_topic_policy" "notifications" {
+  arn = aws_sns_topic.notifications.arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowLambdaPublish"
+        Effect = "Allow"
+        Principal = {
+          AWS = concat([aws_iam_role.lambda.arn], var.additional_publisher_arns)
+        }
+        Action   = "sns:Publish"
+        Resource = aws_sns_topic.notifications.arn
+      }
+    ]
+  })
+}
+
 # --- CloudWatch Log Group ---
 
 resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${local.function_name}"
   retention_in_days = 14
+  kms_key_id        = var.kms_key_arn
 
   tags = var.tags
 }
@@ -65,7 +85,6 @@ resource "aws_iam_role_policy" "lambda_base" {
         Sid    = "CloudWatchLogs"
         Effect = "Allow"
         Action = [
-          "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
@@ -117,9 +136,9 @@ resource "aws_iam_role_policy" "lambda_base" {
         Resource = "*"
       },
       {
-        Sid    = "SNSPublish"
-        Effect = "Allow"
-        Action = "sns:Publish"
+        Sid      = "SNSPublish"
+        Effect   = "Allow"
+        Action   = "sns:Publish"
         Resource = aws_sns_topic.notifications.arn
       }
     ]
@@ -187,7 +206,9 @@ resource "aws_lambda_function" "notification_test" {
   memory_size   = var.lambda_memory
   filename      = var.lambda_source_path
 
-  source_code_hash = filebase64sha256(var.lambda_source_path)
+  source_code_hash = fileexists(var.lambda_source_path) ? filebase64sha256(var.lambda_source_path) : null
+
+  reserved_concurrent_executions = 1
 
   environment {
     variables = merge(

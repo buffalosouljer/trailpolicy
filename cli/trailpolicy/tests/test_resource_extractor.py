@@ -160,3 +160,17 @@ class TestResourceExtractor:
         ]
         result = extract_resources(events, partition="aws-us-gov")
         assert "arn:aws-us-gov:s3:::gov-bucket" in result[0].resources
+
+    def test_unhandled_service_with_params_gets_wildcard(self):
+        """Services with params but no extractor should get wildcard resources."""
+        events = [
+            ParsedEvent(
+                event_source="sns.amazonaws.com",
+                event_name="Publish",
+                request_parameters={"topicArn": "arn:aws:sns:us-east-1:123:my-topic"},
+                aws_region="us-east-1",
+                account_id="123456789012",
+            )
+        ]
+        result = extract_resources(events, partition="aws")
+        assert result[0].resources == ["*"]

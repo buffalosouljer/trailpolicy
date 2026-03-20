@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 
 import boto3
@@ -11,6 +12,38 @@ import boto3
 from ..config import BOTO_CONFIG
 
 logger = logging.getLogger(__name__)
+
+_ARN_PATTERN = re.compile(
+    r"^arn:[a-z\-]+:iam::\d{12}:(role|user)/[\w+=,.@/\-]+$"
+)
+_SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z0-9_]+$")
+_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _validate_athena_inputs(
+    role_arn: str,
+    database: str,
+    table: str,
+    start_date: str,
+    end_date: str,
+) -> None:
+    """Validate inputs before interpolating into SQL to prevent injection."""
+    if not _ARN_PATTERN.match(role_arn):
+        raise ValueError(f"Invalid role ARN format: {role_arn}")
+    if not _SAFE_IDENTIFIER.match(database):
+        raise ValueError(
+            f"Invalid database name: {database!r}. "
+            "Must be alphanumeric with underscores only."
+        )
+    if not _SAFE_IDENTIFIER.match(table):
+        raise ValueError(
+            f"Invalid table name: {table!r}. "
+            "Must be alphanumeric with underscores only."
+        )
+    if not _DATE_PATTERN.match(start_date):
+        raise ValueError(f"Invalid start_date format: {start_date!r}. Use YYYY-MM-DD.")
+    if not _DATE_PATTERN.match(end_date):
+        raise ValueError(f"Invalid end_date format: {end_date!r}. Use YYYY-MM-DD.")
 
 
 def fetch_events_athena(
@@ -36,6 +69,8 @@ def fetch_events_athena(
     Returns:
         List of event dicts matching the CloudTrail event format.
     """
+    _validate_athena_inputs(role_arn, database, table, start_date, end_date)
+
     client = boto3.client("athena", region_name=region, config=BOTO_CONFIG)
 
     query = f"""
@@ -53,12 +88,15 @@ def fetch_events_athena(
     # Start query execution
     response = client.start_query_execution(
         QueryString=query,
+        QueryExecutionContext={"Database": database, "Catalog": "AwsDataCatalog"},
         WorkGroup=workgroup,
     )
     query_execution_id = response["QueryExecutionId"]
     logger.info("Athena query ID: %s", query_execution_id)
 
-    # Poll for completion
+    # Poll for completion (300s timeout)
+    timeout_secs = 300
+    start_time = time.monotonic()
     while True:
         status_response = client.get_query_execution(
             QueryExecutionId=query_execution_id
@@ -73,6 +111,14 @@ def fetch_events_athena(
             )
             logger.error("Athena query %s: %s", state, reason)
             return []
+        if time.monotonic() - start_time > timeout_secs:
+            logger.error(
+                "Athena query %s timed out after %ds",
+                query_execution_id, timeout_secs,
+            )
+            raise TimeoutError(
+                f"Athena query did not complete within {timeout_secs}s"
+            )
         time.sleep(2)
 
     # Fetch results

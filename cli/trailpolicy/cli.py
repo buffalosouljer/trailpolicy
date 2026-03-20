@@ -106,8 +106,12 @@ def generate(
     if not partition:
         try:
             partition = detect_partition(region)
-        except Exception:
+        except Exception as e:
             partition = "aws"
+            console.print(
+                f"[yellow]WARNING: Could not detect AWS partition ({e}). "
+                f"Defaulting to '{partition}'. Use --partition to override.[/yellow]"
+            )
 
     # Validate Athena options
     if source == "athena":
@@ -118,11 +122,17 @@ def generate(
             )
 
     role_name = role_arn.split("/")[-1]
+    if parsed_start or parsed_end:
+        effective_end_display = (parsed_end or datetime.now(timezone.utc)).strftime("%Y-%m-%d")
+        effective_start_display = (parsed_start or (datetime.now(timezone.utc) - timedelta(days=days))).strftime("%Y-%m-%d")
+        lookback_display = f"{effective_start_display} to {effective_end_display}"
+    else:
+        lookback_display = f"{days} days"
     console.print(
         Panel(
             f"[bold]Analyzing role:[/bold] {role_name}\n"
             f"[bold]Source:[/bold] {source}\n"
-            f"[bold]Lookback:[/bold] {days} days",
+            f"[bold]Lookback:[/bold] {lookback_display}",
             title="trailpolicy",
         )
     )
@@ -232,8 +242,12 @@ def diff(
     if not partition:
         try:
             partition = detect_partition(region)
-        except Exception:
+        except Exception as e:
             partition = "aws"
+            console.print(
+                f"[yellow]WARNING: Could not detect AWS partition ({e}). "
+                f"Defaulting to '{partition}'. Use --partition to override.[/yellow]"
+            )
 
     role_name = role_arn.split("/")[-1]
     console.print(

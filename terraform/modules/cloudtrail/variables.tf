@@ -29,3 +29,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "force_destroy" {
+  description = "Allow bucket destruction even when non-empty. Must be false in production."
+  type        = bool
+  default     = false
+}

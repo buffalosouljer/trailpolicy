@@ -6,7 +6,7 @@ data "aws_partition" "current" {}
 
 resource "aws_s3_bucket" "cloudtrail_logs" {
   bucket        = "${var.project_name}-cloudtrail-logs-${data.aws_caller_identity.current.account_id}"
-  force_destroy = true
+  force_destroy = var.force_destroy
   tags          = var.tags
 }
 
@@ -37,6 +37,14 @@ resource "aws_s3_bucket_public_access_block" "cloudtrail_logs" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "cloudtrail_logs" {
+  bucket = aws_s3_bucket.cloudtrail_logs.id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "cloudtrail_logs" {
@@ -93,9 +101,21 @@ resource "aws_s3_bucket_policy" "cloudtrail_logs" {
         Resource = "${aws_s3_bucket.cloudtrail_logs.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
         Condition = {
           StringEquals = {
-            "s3:x-amz-acl"  = "bucket-owner-full-control"
             "aws:SourceArn" = "arn:${data.aws_partition.current.partition}:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/${var.trail_name}"
           }
+        }
+      },
+      {
+        Sid       = "DenyNonTLS"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.cloudtrail_logs.arn,
+          "${aws_s3_bucket.cloudtrail_logs.arn}/*"
+        ]
+        Condition = {
+          Bool = { "aws:SecureTransport" = "false" }
         }
       }
     ]
@@ -109,6 +129,7 @@ resource "aws_cloudwatch_log_group" "cloudtrail" {
 
   name              = "/aws/cloudtrail/${var.trail_name}"
   retention_in_days = 30
+  kms_key_id        = var.kms_key_arn
   tags              = var.tags
 }
 

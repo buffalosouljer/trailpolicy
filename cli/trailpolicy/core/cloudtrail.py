@@ -20,7 +20,6 @@ def fetch_events(
     start_date: datetime | None = None,
     end_date: datetime | None = None,
     region: str | None = None,
-    source: str = "api",
 ) -> list[dict]:
     """Fetch CloudTrail events for a role using LookupEvents API.
 
@@ -30,7 +29,6 @@ def fetch_events(
         start_date: Explicit start date (overrides days).
         end_date: Explicit end date (default: now).
         region: AWS region for the CloudTrail client.
-        source: Event source ('api' for LookupEvents).
 
     Returns:
         List of raw CloudTrail event dicts (parsed from CloudTrailEvent JSON).
