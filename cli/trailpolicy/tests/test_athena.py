@@ -85,3 +85,13 @@ class TestValidateAthenaInputs:
             start_date="2026-01-01",
             end_date="2026-03-01",
         )
+
+    def test_user_arn(self):
+        """IAM user ARNs should be accepted."""
+        _validate_athena_inputs(
+            role_arn="arn:aws:iam::123456789012:user/MyUser",
+            database="db",
+            table="tbl",
+            start_date="2026-01-01",
+            end_date="2026-03-01",
+        )

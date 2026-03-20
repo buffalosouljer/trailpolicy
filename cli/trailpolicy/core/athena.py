@@ -14,7 +14,7 @@ from ..config import BOTO_CONFIG
 logger = logging.getLogger(__name__)
 
 _ARN_PATTERN = re.compile(
-    r"^arn:[a-z\-]+:iam::\d{12}:role/[\w+=,.@/\-]+$"
+    r"^arn:[a-z\-]+:iam::\d{12}:(role|user)/[\w+=,.@/\-]+$"
 )
 _SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z0-9_]+$")
 _DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
